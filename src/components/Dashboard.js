@@ -28,26 +28,45 @@ const data = [
 ];
 
 class Dashboard extends Component {
+  constructor(props) {
+    super(props);
+    this.state = {
+      loading: false,
+      focused: null
+    };
+    
+    this.selectPanel = this.selectPanel.bind(this);
+  }
 
-  state = {
-    loading: false
-  };
+  selectPanel(id) {
+    this.setState((prevState) => ({
+      focused: prevState.focused ? null : id,
+    }));
+  }
 
   render() {
-    const dashboardClasses = classnames("dashboard");
+    const dashboardClasses = classnames("dashboard", {
+      "dashboard--focused": this.state.focused
+     });
 
     if (this.state.loading) {
       return <Loading />;
     }
 
-    const panels = data.map(panel => (
-      <Panel
+    // map over the data array and create a new Panel for each of the four data objects, then filter panel data before converting it to components
+    const panels = (
+      this.state.focused 
+        ? data.filter((panel) => this.state.focused === panel.id) 
+        : data
+    ).map((panel) => {
+      return <Panel
         key={panel.id}
         id={panel.id}
         label={panel.label}
         value={panel.value}
+        onSelect={this.selectPanel}
       />
-    ));
+    });
 
     return <main className={dashboardClasses}>{panels}</main>;
   }
